@@ -8,14 +8,21 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
-  SafeAreaView
+  SafeAreaView,
+  ScrollView,
+  Animated
 } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
-import { px2dp, px2sp } from './../utils/SizeUtils';
+import { px2dp, px2sp } from '../utils/SizeUtils';
+import RecognitionScreen from './RecognitionScreen.js'
+import ROIScreen from './ROIScreen.js'
+
+// import { createAppContainer } from 'react-navigation';
+// import { createStackNavigator } from 'react-navigation-stack';
+// import { RNCamera } from 'react-native-camera';
 // import { SafeAreaView } from 'react-navigation';
 // import { Images, Colors } from '@app/resource'
-// import { createStackNavigator } from 'react-navigation-stack'
-import LinearGradient from 'react-native-linear-gradient';
+
 
 
 
@@ -40,7 +47,9 @@ const createFormData = async (photo, body) => {
 export default class HomeScreen extends Component {
   state = {
     photo: null,
-    imgScan:null
+    imgScan:null,
+    checkTextReturn: 0,
+    textRecognition : ''
   }
 
 
@@ -61,6 +70,12 @@ export default class HomeScreen extends Component {
     })
   }
 
+  // handleCamera = () => {
+  //   return (
+  //     <RNCamera></RNCamera>
+  //   )
+  // }
+  
   handleUploadPhoto = () => {
     const data = [{
       "uri": this.state.photo.data, 
@@ -85,8 +100,17 @@ export default class HomeScreen extends Component {
         var imgScanNe = response["prediction"].imgScan
         console.log("[handleUploadPhoto] imgScan : " + this.state.imgScan)
 
+        var textRecognitionNe = response["prediction"].textRecognition
+
         alert("Upload success!")
-        this.setState({ photo: null,imgScan: imgScanNe });
+        
+        this.setState({ 
+          // photo: null,
+          imgScan: imgScanNe, 
+          checkTextReturn: 1, 
+          textRecognition: textRecognitionNe 
+        });
+
       })
       .catch(error => {
         console.log("upload error", error);
@@ -96,10 +120,19 @@ export default class HomeScreen extends Component {
    
   };
 
+  handleChangeOrigin = () =>{
+    this.setState({ 
+      photo: null,
+      imgScan: null, 
+      checkTextReturn: 0, 
+      textRecognition: '' 
+    });
+  }
 
   render() {
-    const { photo, imgScan } = this.state
-    console.log("[App] imgScan : " + imgScan)
+    const { photo, imgScan, checkTextReturn, textRecognition } = this.state
+    // console.log("[App] imgScan : " + imgScan)
+    console.log("[App] textRecognition : " + textRecognition)
     return (
       // <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       //   {photo && (
@@ -119,38 +152,58 @@ export default class HomeScreen extends Component {
       //       />
 
       // </View>
-      <View style={{ flex: 1}}>
+      
+      <View style={{ flex: 1, }}>
         <StatusBar barStyle='light-content' backgroundColor='#1e1e23'/>
         <SafeAreaView style={ styles.container }>
-          <View style={ { flex: 1 } }>
+
+          <TouchableOpacity onPress={this.handleChangeOrigin}>
             <View style={ styles.avatarWrap }>
-              <Text style={ styles.titleText }>Teo</Text>
-              <Image style={ styles.imgAvatar } source={ require('./../resource/imgs/avatar.png') }/>
+              <Text style={ styles.titleText }>Power .</Text>
+              <Image style={ styles.imgAvatar } source={ require('../resource/imgs/avatar1.png') }/>
             </View>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={ styles.itemContainer } onPress={this.handleChoosePhoto}>
-              <Text style={ styles.itemText }>Choose Photo</Text>
-              <Image style={ styles.itemIcon } source={ require('./../resource/imgs/ic_default.png') }/>
-            </TouchableOpacity>
-          </View>
-
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          {photo && (
-            <React.Fragment>
-              <Image
-                source={{ uri: photo.uri }}
-                style={{ width: 200, height: 200 }}
-              />
-              <Button title="Upload" onPress={this.handleUploadPhoto} />
-            </React.Fragment>
+          {checkTextReturn != 1 && (
+              <TouchableOpacity style={ styles.itemContainer } onPress={this.handleChoosePhoto}>
+                <Text style={ styles.itemText }>Choose Photo</Text>
+                <Image style={ styles.itemIcon } source={ require('../resource/imgs/ic_default.png') }/>
+              </TouchableOpacity>
           )}
-          </View>
+          
+          <ScrollView style={ styles.fill }>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+              {checkTextReturn == 1 && imgScan != '' && (
+                  <React.Fragment>
+                    <RecognitionScreen imgScan = {imgScan} textRecognition={textRecognition}/>
+                  </React.Fragment>
+              )}
+              {checkTextReturn == 1 && imgScan == '' && (
+                  <React.Fragment>
+                    <ROIScreen photo={photo} />
+                  </React.Fragment>
+              )}
+
+              {photo &&  checkTextReturn != 1 &&(
+                <React.Fragment>
+                  <Image
+                    source={{ uri: photo.uri }}
+                    style={{ width: 350, height: 300 }}
+                  />
+                  <Button title="Upload" onPress={this.handleUploadPhoto } />
+                </React.Fragment>
+              )}
+            </View>
+            <View style={ styles.footer }>
+              <Image style={{ width: 402, height: 150}} source={ require('../resource/imgs/ic_presentation.png') }/>
+            </View>
+          </ScrollView>
         </SafeAreaView>
       </View>
     )
   }
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -158,12 +211,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e1e23',
   },
   avatarWrap: {
-    marginBottom:  px2dp(32),
-    marginTop: px2dp(24),
+    marginBottom:  px2dp(20),
+    marginTop: px2dp(10),
+    marginLeft: px2dp(-25),
+    marginRight: px2dp(30),
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: px2dp(24),
+    // paddingHorizontal: px2dp(20),
+    paddingLeft: px2dp(50),
+    // paddingRight: px2dp(34),
+    borderColor: 'pink',
+    borderRadius: 40,
+    backgroundColor: '#626262',
   },
   imgAvatar: {
     height: px2dp(64),
@@ -193,6 +253,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  itemTextRecognition: {
+    fontSize: px2dp(12),
+    color: 'white',
+    fontWeight: 'bold',
+    marginLeft: px2dp(10),
+    marginRight: px2dp(10)
+  },
   itemIcon: {
     height: px2dp(40),
     width:px2dp(40),
@@ -211,6 +278,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  fill: {
+    flex: 1,
+  },
+  row: {
+    height: 40,
+    margin: 16,
+    backgroundColor: '#D3D3D3',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer:{
+    // bottom: 0,
+    // left: 0,
+    position: 'relative',
+    marginTop: px2dp(240),
+    marginLeft: px2dp(-20),
+  }
 });
 
-
+// https://github.com/MarnoDev/react-native-qrcode-scanner-view
+// https://github.com/madhavanmalolan/awesome-reactnative-ui

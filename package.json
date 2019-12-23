@@ -10,13 +10,20 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@terrylinla/react-native-sketch-canvas": "^0.8.0",
     "axios": "^0.19.0",
     "react": "16.9.0",
     "react-native": "0.61.4",
     "react-native-base64": "0.0.2",
     "react-native-fs": "^2.16.2",
+    "react-native-gesture-handler": "^1.5.2",
+    "react-native-image-crop-picker": "^0.26.1",
     "react-native-image-picker": "^1.1.0",
     "react-native-linear-gradient": "^2.5.6",
+    "react-native-reanimated": "^1.4.0",
+    "react-native-screens": "^1.0.0-alpha.23",
+    "react-native-sketch": "^1.1.0",
+    "react-native-svg": "^9.13.6",
     "react-navigation": "^4.0.10",
     "react-navigation-stack": "^1.10.3"
   },

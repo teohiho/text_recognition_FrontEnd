@@ -179,11 +179,16 @@ android {
 }
 
 dependencies {
+    implementation project(':@terrylinla_react-native-sketch-canvas')
+    implementation project(':react-native-image-crop-picker')
+    implementation project(':react-native-svg')
     implementation project(':react-native-linear-gradient')
     implementation project(':react-native-fs')
     implementation project(':react-native-image-picker')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-alpha02'
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
